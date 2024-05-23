@@ -1,0 +1,193 @@
+basePath: /
+definitions:
+  model.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      request_uuid:
+        type: string
+    type: object
+  model.WalletCreateDTO:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      initialAmount:
+        type: number
+      name:
+        type: string
+      userId:
+        type: integer
+    required:
+    - currency
+    - name
+    type: object
+  model.WalletDeleteDTO:
+    properties:
+      id:
+        type: integer
+      userId:
+        type: integer
+    type: object
+  model.WalletUpdateDTO:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      initialAmount:
+        type: number
+      name:
+        type: string
+      userId:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Wallets service.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Portmonetka wallets service
+paths:
+  /users/{userId}/wallets:
+    get:
+      consumes:
+      - application/json
+      description: Gets user's wallets
+      operationId: get-wallets
+      parameters:
+      - description: Authorized user ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wallets retrieved
+          schema:
+            $ref: '#/definitions/model.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get user's wallets
+      tags:
+      - Wallet
+    post:
+      consumes:
+      - application/json
+      description: Creates a new wallet with the provided information
+      operationId: create-wallet
+      parameters:
+      - description: Authorized user ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Wallet object to be created
+        in: body
+        name: wallet
+        required: true
+        schema:
+          $ref: '#/definitions/model.WalletCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Wallet created
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create a new wallet
+      tags:
+      - Wallet
+  /users/{userId}/wallets/{walletId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes wallet by the provided wallet ID
+      operationId: delete-wallet
+      parameters:
+      - description: Authorized user ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Wallet delete request
+        in: body
+        name: wallet
+        required: true
+        schema:
+          $ref: '#/definitions/model.WalletDeleteDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Delete wallet
+      tags:
+      - Wallet
+    patch:
+      consumes:
+      - application/json
+      description: Updates wallet's properties
+      operationId: update-wallet
+      parameters:
+      - description: Authorized user ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Wallet update attributes
+        in: body
+        name: wallet
+        required: true
+        schema:
+          $ref: '#/definitions/model.WalletUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wallet updated
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Update wallet
+      tags:
+      - Wallet
+schemes:
+- http
+- https
+swagger: "2.0"
