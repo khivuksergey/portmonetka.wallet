@@ -1,0 +1,17 @@
+{
+  "Server": {
+    "StopTimeout": "5s",
+    "Port": 8081
+  },
+  "Router": {
+    "UseLogger": false,
+    "UseRecovery": true
+  },
+  "Logger": {
+    "LogLevel": "ERROR"
+  },
+  "DB": {
+    "ConnectionString": "user=%s password=%s dbname=%s host=%s port=5432 sslmode=disable",
+    "TablePrefix": "portmonetka."
+  }
+}
