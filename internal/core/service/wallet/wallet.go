@@ -73,7 +73,7 @@ func (w *wallet) validateUpdateWalletAttributes(wallet *entity.Wallet, walletUpd
 		if len(*walletUpdateDTO.Description) > 256 {
 			return serviceerror.WalletDescriptionLengthError
 		}
-		wallet.Description = walletUpdateDTO.Description
+		wallet.Description = *walletUpdateDTO.Description
 	}
 	if walletUpdateDTO.Currency != nil {
 		if len(*walletUpdateDTO.Currency) != 3 {

@@ -31,7 +31,7 @@ func TestGetWalletsByUserId_Success(t *testing.T) {
 			Id:            1,
 			UserId:        userId,
 			Name:          "Test Wallet 1",
-			Description:   ptr[string]("Description 1"),
+			Description:   "Description 1",
 			Currency:      "USD",
 			InitialAmount: decimal.NewFromFloat(100.00),
 		},
@@ -39,7 +39,7 @@ func TestGetWalletsByUserId_Success(t *testing.T) {
 			Id:            2,
 			UserId:        userId,
 			Name:          "Test Wallet 2",
-			Description:   ptr[string]("Description 2"),
+			Description:   "Description 2",
 			Currency:      "EUR",
 			InitialAmount: decimal.NewFromFloat(200.00),
 		},
@@ -72,7 +72,7 @@ func TestCreateWallet_Success(t *testing.T) {
 	walletCreateDTO := &model.WalletCreateDTO{
 		UserId:        1,
 		Name:          "Test wallet",
-		Description:   ptr[string]("A test wallet"),
+		Description:   "A test wallet",
 		Currency:      "usd",
 		InitialAmount: decimal.NewFromFloat(123.45),
 	}
@@ -118,7 +118,7 @@ func TestCreateWallet_DuplicateName_Error(t *testing.T) {
 	walletCreateDTO := &model.WalletCreateDTO{
 		UserId:        1,
 		Name:          "Duplicate wallet",
-		Description:   ptr[string]("A test wallet with duplicate name"),
+		Description:   "A test wallet with duplicate name",
 		Currency:      "USD",
 		InitialAmount: decimal.NewFromFloat(123.45),
 	}
@@ -160,7 +160,7 @@ func TestUpdateWallet_Success(t *testing.T) {
 		Id:            1,
 		UserId:        1,
 		Name:          "Old wallet name",
-		Description:   ptr[string]("Old description"),
+		Description:   "Old description",
 		Currency:      "USD",
 		InitialAmount: decimal.NewFromFloat(100.00),
 	}
@@ -169,7 +169,7 @@ func TestUpdateWallet_Success(t *testing.T) {
 		Id:            1,
 		UserId:        1,
 		Name:          "Updated wallet name",
-		Description:   ptr[string]("Updated description"),
+		Description:   "Updated description",
 		Currency:      "EUR",
 		InitialAmount: decimal.NewFromFloat(150.00),
 	}
@@ -192,7 +192,7 @@ func TestUpdateWallet_Success(t *testing.T) {
 		Times(1).
 		DoAndReturn(func(wallet *entity.Wallet) (*entity.Wallet, error) {
 			wallet.Name = *walletUpdateDTO.Name
-			wallet.Description = walletUpdateDTO.Description
+			wallet.Description = *walletUpdateDTO.Description
 			wallet.Currency = strings.ToUpper(*walletUpdateDTO.Currency)
 			wallet.InitialAmount = *walletUpdateDTO.InitialAmount
 			return wallet, nil
