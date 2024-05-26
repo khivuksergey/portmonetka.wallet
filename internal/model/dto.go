@@ -5,7 +5,7 @@ import "github.com/shopspring/decimal"
 type WalletCreateDTO struct {
 	UserId        uint64          `json:"userId"`
 	Name          string          `json:"name" validate:"required"`
-	Description   *string         `json:"description"`
+	Description   string          `json:"description"`
 	Currency      string          `json:"currency" validate:"required,len=3"`
 	InitialAmount decimal.Decimal `json:"initialAmount"`
 }

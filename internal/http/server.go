@@ -23,10 +23,11 @@ func NewServer() webserver.Server {
 
 	router := NewRouter(cfg, services, log)
 
-	server := webserver.NewServer(router).
+	server := webserver.
+		NewServer(router).
 		WithConfig(&cfg.Server).
 		AddLogger(log).
-		AddStopHandlers(webserver.NewStopHandler("Postgres", db.Close))
+		AddStopHandlers(webserver.NewStopHandler("Database", db.Close))
 
 	return server
 }

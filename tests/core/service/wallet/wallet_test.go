@@ -26,12 +26,12 @@ func TestGetWalletsByUserId_Success(t *testing.T) {
 	walletService := wallet.NewWalletService(mockManager)
 
 	userId := uint64(1)
-	expectedWallets := &[]entity.Wallet{
+	expectedWallets := []entity.Wallet{
 		{
 			Id:            1,
 			UserId:        userId,
 			Name:          "Test Wallet 1",
-			Description:   stringPtr("Description 1"),
+			Description:   "Description 1",
 			Currency:      "USD",
 			InitialAmount: decimal.NewFromFloat(100.00),
 		},
@@ -39,7 +39,7 @@ func TestGetWalletsByUserId_Success(t *testing.T) {
 			Id:            2,
 			UserId:        userId,
 			Name:          "Test Wallet 2",
-			Description:   stringPtr("Description 2"),
+			Description:   "Description 2",
 			Currency:      "EUR",
 			InitialAmount: decimal.NewFromFloat(200.00),
 		},
@@ -72,7 +72,7 @@ func TestCreateWallet_Success(t *testing.T) {
 	walletCreateDTO := &model.WalletCreateDTO{
 		UserId:        1,
 		Name:          "Test wallet",
-		Description:   stringPtr("A test wallet"),
+		Description:   "A test wallet",
 		Currency:      "usd",
 		InitialAmount: decimal.NewFromFloat(123.45),
 	}
@@ -97,7 +97,7 @@ func TestCreateWallet_Success(t *testing.T) {
 		Times(1).
 		Return(expectedWallet, nil)
 
-	createdWallet, err := walletService.CreateWallet(walletCreateDTO)
+	createdWallet, err := walletService.CreateWallet(*walletCreateDTO)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, createdWallet)
@@ -118,7 +118,7 @@ func TestCreateWallet_DuplicateName_Error(t *testing.T) {
 	walletCreateDTO := &model.WalletCreateDTO{
 		UserId:        1,
 		Name:          "Duplicate wallet",
-		Description:   stringPtr("A test wallet with duplicate name"),
+		Description:   "A test wallet with duplicate name",
 		Currency:      "USD",
 		InitialAmount: decimal.NewFromFloat(123.45),
 	}
@@ -129,7 +129,7 @@ func TestCreateWallet_DuplicateName_Error(t *testing.T) {
 		Times(1).
 		Return(true)
 
-	createdWallet, err := walletService.CreateWallet(walletCreateDTO)
+	createdWallet, err := walletService.CreateWallet(*walletCreateDTO)
 
 	assert.Error(t, err)
 	assert.Nil(t, createdWallet)
@@ -150,17 +150,17 @@ func TestUpdateWallet_Success(t *testing.T) {
 	walletUpdateDTO := &model.WalletUpdateDTO{
 		Id:            1,
 		UserId:        1,
-		Name:          stringPtr("Updated wallet name"),
-		Description:   stringPtr("Updated description"),
-		Currency:      stringPtr("eur"),
-		InitialAmount: decimalPtr(decimal.NewFromFloat(150.00)),
+		Name:          ptr[string]("Updated wallet name"),
+		Description:   ptr[string]("Updated description"),
+		Currency:      ptr[string]("eur"),
+		InitialAmount: ptr[decimal.Decimal](decimal.NewFromFloat(150.00)),
 	}
 
 	existingWallet := &entity.Wallet{
 		Id:            1,
 		UserId:        1,
 		Name:          "Old wallet name",
-		Description:   stringPtr("Old description"),
+		Description:   "Old description",
 		Currency:      "USD",
 		InitialAmount: decimal.NewFromFloat(100.00),
 	}
@@ -169,7 +169,7 @@ func TestUpdateWallet_Success(t *testing.T) {
 		Id:            1,
 		UserId:        1,
 		Name:          "Updated wallet name",
-		Description:   stringPtr("Updated description"),
+		Description:   "Updated description",
 		Currency:      "EUR",
 		InitialAmount: decimal.NewFromFloat(150.00),
 	}
@@ -192,13 +192,13 @@ func TestUpdateWallet_Success(t *testing.T) {
 		Times(1).
 		DoAndReturn(func(wallet *entity.Wallet) (*entity.Wallet, error) {
 			wallet.Name = *walletUpdateDTO.Name
-			wallet.Description = walletUpdateDTO.Description
+			wallet.Description = *walletUpdateDTO.Description
 			wallet.Currency = strings.ToUpper(*walletUpdateDTO.Currency)
 			wallet.InitialAmount = *walletUpdateDTO.InitialAmount
 			return wallet, nil
 		})
 
-	updatedWalletFromService, err := walletService.UpdateWallet(walletUpdateDTO)
+	updatedWalletFromService, err := walletService.UpdateWallet(*walletUpdateDTO)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedWalletFromService)
@@ -218,10 +218,10 @@ func TestUpdateWallet_WalletNotFound_Error(t *testing.T) {
 
 	walletUpdateDTO := &model.WalletUpdateDTO{
 		Id:            1,
-		Name:          stringPtr("Non-existent wallet"),
-		Description:   stringPtr("This wallet does not exist"),
-		Currency:      stringPtr("USD"),
-		InitialAmount: decimalPtr(decimal.NewFromFloat(200.00)),
+		Name:          ptr[string]("Non-existent wallet"),
+		Description:   ptr[string]("This wallet does not exist"),
+		Currency:      ptr[string]("USD"),
+		InitialAmount: ptr[decimal.Decimal](decimal.NewFromFloat(200.00)),
 	}
 
 	mockWalletRepository.
@@ -230,7 +230,7 @@ func TestUpdateWallet_WalletNotFound_Error(t *testing.T) {
 		Times(1).
 		Return(nil, serviceerror.WalletDoesntExist)
 
-	updatedWallet, err := walletService.UpdateWallet(walletUpdateDTO)
+	updatedWallet, err := walletService.UpdateWallet(*walletUpdateDTO)
 
 	assert.Error(t, err)
 	assert.Nil(t, updatedWallet)
@@ -264,7 +264,7 @@ func TestDeleteWallet_Success(t *testing.T) {
 		Times(1).
 		Return(nil)
 
-	err := walletService.DeleteWallet(walletDeleteDTO)
+	err := walletService.DeleteWallet(*walletDeleteDTO)
 
 	assert.NoError(t, err)
 }
@@ -291,7 +291,7 @@ func TestDeleteWallet_WalletDoesntBelongToUser_Error(t *testing.T) {
 		Times(1).
 		Return(false)
 
-	err := walletService.DeleteWallet(walletDeleteDTO)
+	err := walletService.DeleteWallet(*walletDeleteDTO)
 
 	assert.Error(t, err)
 	assert.Equal(t, serviceerror.WalletDoesntBelongToUser, err)

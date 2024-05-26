@@ -98,10 +98,10 @@ func (mr *MockWalletRepositoryMockRecorder) GetWalletById(id any) *gomock.Call {
 }
 
 // GetWalletsByUserId mocks base method.
-func (m *MockWalletRepository) GetWalletsByUserId(userId uint64) (*[]entity.Wallet, error) {
+func (m *MockWalletRepository) GetWalletsByUserId(userId uint64) ([]entity.Wallet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWalletsByUserId", userId)
-	ret0, _ := ret[0].(*[]entity.Wallet)
+	ret0, _ := ret[0].([]entity.Wallet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

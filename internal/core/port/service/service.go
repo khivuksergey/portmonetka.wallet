@@ -10,8 +10,8 @@ type Manager struct {
 }
 
 type WalletService interface {
-	GetWalletsByUserId(userId uint64) (*[]entity.Wallet, error)
-	CreateWallet(walletCreateDTO *model.WalletCreateDTO) (*entity.Wallet, error)
-	UpdateWallet(walletUpdateDTO *model.WalletUpdateDTO) (*entity.Wallet, error)
-	DeleteWallet(walletDeleteDRO *model.WalletDeleteDTO) error
+	GetWalletsByUserId(userId uint64) ([]entity.Wallet, error)
+	CreateWallet(walletCreateDTO model.WalletCreateDTO) (*entity.Wallet, error)
+	UpdateWallet(walletUpdateDTO model.WalletUpdateDTO) (*entity.Wallet, error)
+	DeleteWallet(walletDeleteDTO model.WalletDeleteDTO) error
 }
