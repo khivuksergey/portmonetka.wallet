@@ -17,11 +17,11 @@ func NewWalletService(repositoryManager *repository.Manager) service.WalletServi
 	return &wallet{walletRepository: repositoryManager.Wallet}
 }
 
-func (w *wallet) GetWalletsByUserId(userId uint64) (*[]entity.Wallet, error) {
+func (w *wallet) GetWalletsByUserId(userId uint64) ([]entity.Wallet, error) {
 	return w.walletRepository.GetWalletsByUserId(userId)
 }
 
-func (w *wallet) CreateWallet(walletCreateDTO *model.WalletCreateDTO) (*entity.Wallet, error) {
+func (w *wallet) CreateWallet(walletCreateDTO model.WalletCreateDTO) (*entity.Wallet, error) {
 	if w.walletRepository.ExistsWithName(walletCreateDTO.UserId, walletCreateDTO.Name) {
 		return nil, serviceerror.WalletAlreadyExists
 	}
@@ -34,7 +34,7 @@ func (w *wallet) CreateWallet(walletCreateDTO *model.WalletCreateDTO) (*entity.W
 	})
 }
 
-func (w *wallet) UpdateWallet(walletUpdateDTO *model.WalletUpdateDTO) (*entity.Wallet, error) {
+func (w *wallet) UpdateWallet(walletUpdateDTO model.WalletUpdateDTO) (*entity.Wallet, error) {
 	walletToUpdate, err := w.walletRepository.GetWalletById(walletUpdateDTO.Id)
 	if err != nil {
 		return nil, serviceerror.WalletDoesntExist
@@ -46,7 +46,7 @@ func (w *wallet) UpdateWallet(walletUpdateDTO *model.WalletUpdateDTO) (*entity.W
 	return w.walletRepository.UpdateWallet(walletToUpdate)
 }
 
-func (w *wallet) DeleteWallet(walletDeleteDTO *model.WalletDeleteDTO) error {
+func (w *wallet) DeleteWallet(walletDeleteDTO model.WalletDeleteDTO) error {
 	if !w.walletRepository.WalletBelongsToUser(walletDeleteDTO.Id, walletDeleteDTO.UserId) {
 		return serviceerror.WalletDoesntBelongToUser
 	}
@@ -54,7 +54,7 @@ func (w *wallet) DeleteWallet(walletDeleteDTO *model.WalletDeleteDTO) error {
 }
 
 // TODO move attributes validation to validator
-func (w *wallet) validateUpdateWalletAttributes(wallet *entity.Wallet, walletUpdateDTO *model.WalletUpdateDTO) error {
+func (w *wallet) validateUpdateWalletAttributes(wallet *entity.Wallet, walletUpdateDTO model.WalletUpdateDTO) error {
 	if walletUpdateDTO.Name == nil &&
 		walletUpdateDTO.Description == nil &&
 		walletUpdateDTO.Currency == nil &&

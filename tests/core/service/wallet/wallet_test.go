@@ -26,7 +26,7 @@ func TestGetWalletsByUserId_Success(t *testing.T) {
 	walletService := wallet.NewWalletService(mockManager)
 
 	userId := uint64(1)
-	expectedWallets := &[]entity.Wallet{
+	expectedWallets := []entity.Wallet{
 		{
 			Id:            1,
 			UserId:        userId,
@@ -97,7 +97,7 @@ func TestCreateWallet_Success(t *testing.T) {
 		Times(1).
 		Return(expectedWallet, nil)
 
-	createdWallet, err := walletService.CreateWallet(walletCreateDTO)
+	createdWallet, err := walletService.CreateWallet(*walletCreateDTO)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, createdWallet)
@@ -129,7 +129,7 @@ func TestCreateWallet_DuplicateName_Error(t *testing.T) {
 		Times(1).
 		Return(true)
 
-	createdWallet, err := walletService.CreateWallet(walletCreateDTO)
+	createdWallet, err := walletService.CreateWallet(*walletCreateDTO)
 
 	assert.Error(t, err)
 	assert.Nil(t, createdWallet)
@@ -198,7 +198,7 @@ func TestUpdateWallet_Success(t *testing.T) {
 			return wallet, nil
 		})
 
-	updatedWalletFromService, err := walletService.UpdateWallet(walletUpdateDTO)
+	updatedWalletFromService, err := walletService.UpdateWallet(*walletUpdateDTO)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedWalletFromService)
@@ -230,7 +230,7 @@ func TestUpdateWallet_WalletNotFound_Error(t *testing.T) {
 		Times(1).
 		Return(nil, serviceerror.WalletDoesntExist)
 
-	updatedWallet, err := walletService.UpdateWallet(walletUpdateDTO)
+	updatedWallet, err := walletService.UpdateWallet(*walletUpdateDTO)
 
 	assert.Error(t, err)
 	assert.Nil(t, updatedWallet)
@@ -264,7 +264,7 @@ func TestDeleteWallet_Success(t *testing.T) {
 		Times(1).
 		Return(nil)
 
-	err := walletService.DeleteWallet(walletDeleteDTO)
+	err := walletService.DeleteWallet(*walletDeleteDTO)
 
 	assert.NoError(t, err)
 }
@@ -291,7 +291,7 @@ func TestDeleteWallet_WalletDoesntBelongToUser_Error(t *testing.T) {
 		Times(1).
 		Return(false)
 
-	err := walletService.DeleteWallet(walletDeleteDTO)
+	err := walletService.DeleteWallet(*walletDeleteDTO)
 
 	assert.Error(t, err)
 	assert.Equal(t, serviceerror.WalletDoesntBelongToUser, err)

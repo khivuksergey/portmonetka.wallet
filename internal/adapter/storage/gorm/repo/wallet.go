@@ -38,12 +38,12 @@ func (w *walletRepository) WalletBelongsToUser(id, userId uint64) bool {
 	return wallet.UserId == userId
 }
 
-func (w *walletRepository) GetWalletsByUserId(userId uint64) (*[]entity.Wallet, error) {
-	wallets := &[]entity.Wallet{}
+func (w *walletRepository) GetWalletsByUserId(userId uint64) ([]entity.Wallet, error) {
+	var wallets []entity.Wallet
 	result := w.db.
 		Where("user_id = ?", userId).
 		Order("updated_at desc").
-		Find(wallets)
+		Find(&wallets)
 	if result.Error != nil {
 		return nil, result.Error
 	}

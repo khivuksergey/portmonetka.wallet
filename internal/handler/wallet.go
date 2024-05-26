@@ -19,7 +19,6 @@ type WalletHandler struct {
 }
 
 func NewWalletHandler(services *service.Manager, logger logger.Logger) *WalletHandler {
-
 	return &WalletHandler{
 		walletService: services.Wallet,
 		logger:        logger,
@@ -39,16 +38,16 @@ func NewWalletHandler(services *service.Manager, logger logger.Logger) *WalletHa
 // @Success 200 {object} model.Response "Wallets retrieved"
 // @Failure 422 {object} model.Response "Unprocessable entity"
 // @Router /users/{userId}/wallets [get]
-func (u WalletHandler) GetWallets(c echo.Context) error {
+func (w WalletHandler) GetWallets(c echo.Context) error {
 	requestUuid := c.Get(common.RequestUuidKey).(string)
 	userId := c.Get("userId").(uint64)
 
-	wallets, err := u.walletService.GetWalletsByUserId(userId)
+	wallets, err := w.walletService.GetWalletsByUserId(userId)
 	if err != nil {
 		return common.NewUnprocessableEntityError(serviceerror.CannotGetWallets, err)
 	}
 
-	u.logger.Info(logger.LogMessage{
+	w.logger.Info(logger.LogMessage{
 		Action:      "GetWallets",
 		Message:     "Wallets retrieved",
 		UserId:      &userId,
@@ -76,21 +75,22 @@ func (u WalletHandler) GetWallets(c echo.Context) error {
 // @Failure 400 {object} model.Response "Bad request"
 // @Failure 422 {object} model.Response "Unprocessable entity"
 // @Router /users/{userId}/wallets [post]
-func (u WalletHandler) CreateWallet(c echo.Context) error {
+func (w WalletHandler) CreateWallet(c echo.Context) error {
 	requestUuid := c.Get(common.RequestUuidKey).(string)
 	userId := c.Get("userId").(uint64)
+	walletCreateDTO := &model.WalletCreateDTO{UserId: userId}
 
-	walletCreateDTO, err := u.bindWalletCreateDtoValidate(c, userId)
+	err := bindDtoValidate[model.WalletCreateDTO](c, w.validate, walletCreateDTO)
 	if err != nil {
 		return common.NewValidationError(serviceerror.InvalidInputData, err)
 	}
 
-	wallet, err := u.walletService.CreateWallet(walletCreateDTO)
+	wallet, err := w.walletService.CreateWallet(*walletCreateDTO)
 	if err != nil {
 		return common.NewUnprocessableEntityError(serviceerror.CannotCreateWallet, err)
 	}
 
-	u.logger.Info(logger.LogMessage{
+	w.logger.Info(logger.LogMessage{
 		Action:      "CreateWallet",
 		Message:     "Wallet created",
 		UserId:      &wallet.UserId,
@@ -119,21 +119,26 @@ func (u WalletHandler) CreateWallet(c echo.Context) error {
 // @Failure 400 {object} model.Response "Bad request"
 // @Failure 422 {object} model.Response "Unprocessable entity"
 // @Router /users/{userId}/wallets/{walletId} [patch]
-func (u WalletHandler) UpdateWallet(c echo.Context) error {
+func (w WalletHandler) UpdateWallet(c echo.Context) error {
 	requestUuid := c.Get(common.RequestUuidKey).(string)
 	userId := c.Get("userId").(uint64)
+	walletId, _ := strconv.ParseUint(c.Param("walletId"), 10, 64)
+	walletUpdateDTO := &model.WalletUpdateDTO{
+		Id:     walletId,
+		UserId: userId,
+	}
 
-	walletUpdateDTO, err := u.bindWalletUpdateDtoValidate(c, userId)
+	err := bindDtoValidate[model.WalletUpdateDTO](c, w.validate, walletUpdateDTO)
 	if err != nil {
 		return common.NewValidationError(serviceerror.InvalidInputData, err)
 	}
 
-	wallet, err := u.walletService.UpdateWallet(walletUpdateDTO)
+	wallet, err := w.walletService.UpdateWallet(*walletUpdateDTO)
 	if err != nil {
 		return common.NewUnprocessableEntityError(serviceerror.CannotUpdateWallet, err)
 	}
 
-	u.logger.Info(logger.LogMessage{
+	w.logger.Info(logger.LogMessage{
 		Action:      "UpdateWallet",
 		Message:     "Wallet updated",
 		UserId:      &userId,
@@ -162,20 +167,25 @@ func (u WalletHandler) UpdateWallet(c echo.Context) error {
 // @Failure 400 {object} model.Response "Bad request"
 // @Failure 422 {object} model.Response "Unprocessable entity"
 // @Router /users/{userId}/wallets/{walletId} [delete]
-func (u WalletHandler) DeleteWallet(c echo.Context) error {
+func (w WalletHandler) DeleteWallet(c echo.Context) error {
 	requestUuid := c.Get(common.RequestUuidKey).(string)
 	userId := c.Get("userId").(uint64)
+	walletId, _ := strconv.ParseUint(c.Param("walletId"), 10, 64)
+	walletDeleteDTO := &model.WalletDeleteDTO{
+		Id:     walletId,
+		UserId: userId,
+	}
 
-	walletDeleteDTO, err := u.bindWalletDeleteDtoValidate(c, userId)
+	err := bindDtoValidate[model.WalletDeleteDTO](c, w.validate, walletDeleteDTO)
 	if err != nil {
 		return common.NewValidationError(serviceerror.InvalidInputData, err)
 	}
 
-	if err := u.walletService.DeleteWallet(walletDeleteDTO); err != nil {
+	if err := w.walletService.DeleteWallet(*walletDeleteDTO); err != nil {
 		return common.NewUnprocessableEntityError(serviceerror.CannotDeleteWallet, err)
 	}
 
-	u.logger.Info(logger.LogMessage{
+	w.logger.Info(logger.LogMessage{
 		Action:      "DeleteWallet",
 		Message:     "Wallet deleted",
 		UserId:      &userId,
@@ -186,42 +196,12 @@ func (u WalletHandler) DeleteWallet(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (u WalletHandler) bindWalletCreateDtoValidate(c echo.Context, userId uint64) (*model.WalletCreateDTO, error) {
-	walletCreateDTO := new(model.WalletCreateDTO)
-	if err := c.Bind(walletCreateDTO); err != nil {
-		return nil, err
+func bindDtoValidate[T any](c echo.Context, validate *validator.Validate, dto *T) error {
+	if err := c.Bind(dto); err != nil {
+		return err
 	}
-	if err := u.validate.Struct(walletCreateDTO); err != nil {
-		return nil, err
+	if err := validate.Struct(dto); err != nil {
+		return err
 	}
-	walletCreateDTO.UserId = userId
-	return walletCreateDTO, nil
-}
-
-func (u WalletHandler) bindWalletUpdateDtoValidate(c echo.Context, userId uint64) (*model.WalletUpdateDTO, error) {
-	walletUpdateDTO := new(model.WalletUpdateDTO)
-	if err := c.Bind(walletUpdateDTO); err != nil {
-		return nil, err
-	}
-	if err := u.validate.Struct(walletUpdateDTO); err != nil {
-		return nil, err
-	}
-	walletUpdateDTO.UserId = userId
-	walletId, _ := strconv.ParseUint(c.Param("walletId"), 10, 64)
-	walletUpdateDTO.Id = walletId
-	return walletUpdateDTO, nil
-}
-
-func (u WalletHandler) bindWalletDeleteDtoValidate(c echo.Context, userId uint64) (*model.WalletDeleteDTO, error) {
-	walletDeleteDTO := new(model.WalletDeleteDTO)
-	if err := c.Bind(walletDeleteDTO); err != nil {
-		return nil, err
-	}
-	if err := u.validate.Struct(walletDeleteDTO); err != nil {
-		return nil, err
-	}
-	walletDeleteDTO.UserId = userId
-	walletId, _ := strconv.ParseUint(c.Param("walletId"), 10, 64)
-	walletDeleteDTO.Id = walletId
-	return walletDeleteDTO, nil
+	return nil
 }
