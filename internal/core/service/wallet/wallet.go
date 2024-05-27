@@ -68,6 +68,7 @@ func (w *wallet) validateUpdateWalletAttributes(wallet *entity.Wallet, walletUpd
 		if w.walletRepository.ExistsWithName(walletUpdateDTO.UserId, *walletUpdateDTO.Name) {
 			return serviceerror.WalletAlreadyExists
 		}
+		wallet.Name = *walletUpdateDTO.Name
 	}
 	if walletUpdateDTO.Description != nil {
 		if len(*walletUpdateDTO.Description) > 256 {
